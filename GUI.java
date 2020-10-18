@@ -1,45 +1,61 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 public class GUI {
-    public JPanel panel1;
-    public JButton button1;
-    public JLabel jl;
+    public JPanel root;
+    public JTextArea view;
+    private JButton sendButton;
+    public JLabel label;
+    public JPanel chatPanel;
+    private JTextField chat;
+    private DataOutputStream messageToServer;
+    private String username;
 
     public GUI() {
-        button1.addActionListener(new ActionListener() {
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) { // reference: https://github.com/Imran92/Java-UDP-Video-Stream-Server/blob/master/src/java_video_stream/JavaClient.java#L185
+                String sentence = chat.getText();
+                try {
+                    messageToServer.writeUTF(username + ": " + sentence + '\n');
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                chat.setText(null);
+            }
+        });
+        chat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                String sentence = chat.getText();
+                try {
+                    messageToServer.writeUTF(username + ": " + sentence + '\n');
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                chat.setText(null);
             }
         });
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setDataOutputStream(DataOutputStream messageToServer) {
+        this.messageToServer = messageToServer;
+    }
+
     public static void main(String[] args) {
-        JFrame frame = new JFrame("test");
+        JFrame frame = new JFrame("Test");
         GUI gui = new GUI();
-        frame.setContentPane(gui.panel1);
+        frame.setContentPane(gui.root); // reference: https://www.youtube.com/watch?v=5vSyylPPEko
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-
-        try {
-
-            BufferedImage img = ImageIO.read(new File("screen.jpg"));;
-
-            gui.jl.setIcon(new ImageIcon(img));
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        frame.repaint();
-
-
     }
 }
